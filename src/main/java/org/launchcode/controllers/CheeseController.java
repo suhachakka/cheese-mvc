@@ -1,8 +1,9 @@
 package org.launchcode.controllers;
 
 import org.launchcode.models.Cheese;
-import org.launchcode.models.CheeseData;
 import org.launchcode.models.CheeseType;
+import org.launchcode.models.data.CheeseDao;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.Errors;
@@ -12,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.validation.Valid;
-import java.util.ArrayList;
+
 
 /**
  * Created by LaunchCode
@@ -21,12 +22,18 @@ import java.util.ArrayList;
 @RequestMapping("cheese")
 public class CheeseController {
 
+    // given an instance of this class by the spring framework and its all done by crud repository ,interface
+    @Autowired
+    private CheeseDao cheeseDao;
+
+
     // Request path: /cheese
     @RequestMapping(value = "")
     public String index(Model model) {
 
-        model.addAttribute("cheeses", CheeseData.getAll());
         model.addAttribute("title", "My Cheeses");
+        model.addAttribute("cheeses",cheeseDao.findAll());
+
 
         return "cheese/index";
     }
@@ -48,14 +55,13 @@ public class CheeseController {
             return "cheese/add";
         }
 
-        CheeseData.add(newCheese);
+        cheeseDao.save(newCheese);
         return "redirect:";
     }
 
     @RequestMapping(value = "remove", method = RequestMethod.GET)
     public String displayRemoveCheeseForm(Model model) {
-        model.addAttribute("cheeses", CheeseData.getAll());
-        model.addAttribute("title", "Remove Cheese");
+        model.addAttribute("cheeses", cheeseDao.findAll());
         return "cheese/remove";
     }
 
@@ -63,7 +69,7 @@ public class CheeseController {
     public String processRemoveCheeseForm(@RequestParam int[] cheeseIds) {
 
         for (int cheeseId : cheeseIds) {
-            CheeseData.remove(cheeseId);
+            cheeseDao.delete(cheeseId);
         }
 
         return "redirect:";
